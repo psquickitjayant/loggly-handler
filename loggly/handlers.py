@@ -28,26 +28,9 @@ class HTTPSHandler(logging.Handler):
         else:
             return record.getMessage()
 
-    def to_loggly(self, record):
-        if self.fqdn:
-            host = socket.getfqdn()
-        elif self.localname:
-            host = self.localname
-        else:
-            host = socket.gethostname()
-
-        return {
-            'host': host,
-            'message': record.getMessage(),
-            'full_message': self.get_full_message(record),
-            'timestamp': record.created,
-            'level': logging.getLevelName(record.levelno),
-            'facility': self.facility or record.name,
-        }
-
     def emit(self, record):
         try:
-            payload = self.to_loggly(record)
+            payload = self.format(record)
             session.post(self.url, data=payload, background_callback=bg_cb)
         except (KeyboardInterrupt, SystemExit):
             raise
