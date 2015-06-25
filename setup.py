@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="loggly-handler",
-    version='0.1.2',
+    version='0.1.3',
     description="Python logging handler that sends messages to Loggly",
     keywords="loggly logging handler https",
     author="Josh Kennedy",
