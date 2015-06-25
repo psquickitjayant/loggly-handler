@@ -16,31 +16,36 @@ Create a Configuration file python.conf and add HTTPSHandler to Configuration Fi
     
     [handlers]
     keys=HTTPSHandler
-    
+
     [handler_HTTPSHandler]
     class=loggly.handlers.HTTPSHandler
-    level=INFO
+    formatter=jsonFormat
     args=('https://logs-01.loggly.com/inputs/TOKEN/tag/python','POST')
-    
+
     [formatters]
-    keys=
-    
+    keys=jsonFormat
+
     [loggers]
     keys=root
-    
+
     [logger_root]
     handlers=HTTPSHandler
+    level=INFO
+
+    [formatter_jsonFormat]
+    format={ "loggerName":"%(name)s", "asciTime":"%(asctime)s", "fileName":"%(filename)s", "logRecordCreationTime":"%(created)f", "functionName":"%(funcName)s", "levelNo":"%(levelno)s", "lineNo":"%(lineno)d", "time":"%(msecs)d", "levelName":"%(levelname)s", "message":"%(message)s"}
+    datefmt=
 
 ## Use Configuration in python file
 
     import logging
     import logging.config
     import loggly.handlers
-    
+
     logging.config.fileConfig('python.conf')
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    logger.info('test Loggly log')
+    logger = logging.getLogger('myLogger')
+
+    logger.info('Test log')
 
 
 Replace
