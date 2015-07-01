@@ -4,7 +4,6 @@ import logging
 
 import loggly.handlers as handlers
 
-
 class TestLogglyHandler(unittest.TestCase):
     def setUp(self):
         handlers.session = self.session = Mock()
@@ -63,64 +62,16 @@ class TestLogglyHandler(unittest.TestCase):
         trace.assert_called_once_with('one', 'two')
         self.assertEqual('trace\ntwo', result)
 
-    def test_to_loggly(self):
-        """ it should convert the record to a dictionary
-        with the extra fields """
-        handler = self.handler
-        handler.get_full_message = Mock()
-        handler.get_full_message.return_value = 'test'
-
-        result = handler.to_loggly(self.record)
-
-        self.assertEqual(self.expected, result)
-
-    @patch('socket.getfqdn')
-    def test_to_loggly_fqdn(self, fqdn):
-        """ it should convert the record to a dictionary
-        with the extra fields """
-        handler = self.handler
-        handler.get_full_message = Mock()
-        handler.get_full_message.return_value = 'test'
-
-        handler.fqdn = True
-
-        fqdn.return_value = 'fqdn'
-
-        self.expected['host'] = 'fqdn'
-
-        result = handler.to_loggly(self.record)
-
-        self.assertEqual(self.expected, result)
-
-    @patch('socket.gethostname')
-    def test_to_loggly_hostname(self, hostname):
-        """ it should convert the record to a dictionary
-        with the extra fields """
-        handler = self.handler
-        handler.get_full_message = Mock()
-        handler.get_full_message.return_value = 'test'
-
-        handler.fqdn = False
-        handler.localname = None
-
-        hostname.return_value = 'hostname'
-
-        self.expected['host'] = 'hostname'
-
-        result = handler.to_loggly(self.record)
-
-        self.assertEqual(self.expected, result)
-
     def test_emit(self):
         """ it should emit the record """
         handler = self.handler
 
-        handler.to_loggly = Mock()
-        handler.to_loggly.return_value = 'msg'
+        handler.format = Mock()
+        handler.format.return_value = 'msg'
 
         handler.emit(self.record)
 
-        handler.to_loggly.assert_called_once_with(self.record)
+        handler.format.assert_called_once_with(self.record)
 
         self.session.post.assert_called_once_with(
             'url', data='msg', background_callback=handlers.bg_cb)
@@ -128,7 +79,7 @@ class TestLogglyHandler(unittest.TestCase):
     def test_emit_interrupt(self):
         """ it should raise the interrupt """
         handler = self.handler
-        handler.to_loggly = Mock()
+        handler.format = Mock()
 
         self.session.post.side_effect = KeyboardInterrupt('Boom!')
 
@@ -137,7 +88,7 @@ class TestLogglyHandler(unittest.TestCase):
     def test_emit_exit(self):
         """ it should raise the exit """
         handler = self.handler
-        handler.to_loggly = Mock()
+        handler.format = Mock()
 
         self.session.post.side_effect = SystemExit('Boom!')
 
@@ -146,7 +97,7 @@ class TestLogglyHandler(unittest.TestCase):
     def test_emit_except(self):
         """ it should raise the exit """
         handler = self.handler
-        handler.to_loggly = Mock()
+        handler.format = Mock()
         handler.handleError = Mock()
 
         self.session.post.side_effect = Exception('Boom!')
